@@ -6,7 +6,7 @@ import pandas as pd
 import time
 
 # IP address to scan
-target_ip = "192.168.1.1"
+target_ip = "192.168.1.254"
 
 # Specify the full path to the Nmap executable
 nmap_path = "C:\Program Files (x86)\Nmap.exe"  # Replace with the actual path to Nmap
