@@ -1,20 +1,13 @@
 import os
 import nmap
-import dpkt
 import csv
-import pandas as pd
 import time
 from pythonping import ping
 
-# IP address to scan
-target_ip = "192.168.1.254"
-
-# Specify the full path to the Nmap executable
-nmap_path = "C:\\Program Files (x86)\\Nmap\\nmap.exe"  # Replace with the actual file path
-
-# Create a directory named "nmap scans" on the desktop if it doesn't exist
-output_directory = os.path.expanduser("~/Desktop/nmap scans")
-os.makedirs(output_directory, exist_ok=True)
+# Constants
+TARGET_IP = "192.168.1.254"
+NMAP_PATH = "C:\\Program Files (x86)\\Nmap\\nmap.exe"
+OUTPUT_DIRECTORY = os.path.expanduser("~/Desktop/nmap_scans")
 
 # Function to ping the target IP address
 def ping_target(ip_address):
@@ -25,10 +18,10 @@ def ping_target(ip_address):
         else:
             raise Exception(f"Target IP {ip_address} is not reachable.")
     except Exception as e:
-        print(e)
+        print(f"Error: {e}")
         return False
 
-# Ask the user for confirmation to proceed
+# Function to ask the user for confirmation to proceed
 def ask_user_confirmation():
     while True:
         try:
@@ -42,9 +35,29 @@ def ask_user_confirmation():
         except ValueError:
             print("Invalid input. Please enter 1 to proceed or 2 to abort.")
 
+# Function to run an Nmap scan and handle errors
+def run_nmap_scan(nm, output_filename, scan_args):
+    try:
+        nm.scan(arguments=scan_args)
+        full_output_path = os.path.join(OUTPUT_DIRECTORY, output_filename)
+        with open(full_output_path, 'w') as csvfile:
+            csv_writer = csv.writer(csvfile)
+            csv_writer.writerow(["Host", "Port/Protocol", "State", "Service"])
+            for host in nm.all_hosts():
+                for proto in nm[host].all_protocols():
+                    lport = nm[host][proto].keys()
+                    for port in lport:
+                        # Extract relevant information and write it to the CSV file
+                        service = nm[host][proto][port]['name']
+                        state = nm[host][proto][port]['state']
+                        row = [host, f"{port}/{proto}", state, service]
+                        csv_writer.writerow(row)
+    except Exception as e:
+        print(f"An error occurred during the Nmap scan for {output_filename}: {e}")
+
 # Check if the target is reachable by pinging it
-if not ping_target(target_ip):
-    print(f"Terminating script because target IP {target_ip} is not reachable.")
+if not ping_target(TARGET_IP):
+    print(f"Terminating script because target IP {TARGET_IP} is not reachable.")
 else:
     # Ask the user for confirmation to proceed
     if ask_user_confirmation():
@@ -67,42 +80,28 @@ else:
 
         for i in range(len(scan_commands)):
             try:
-                nm = nmap.PortScanner(nmap_search_path=nmap_path)
-                full_output_path = os.path.join(output_directory, output_filenames[i])
-                scan_args = f"{target_ip} {scan_commands[i]}"
-                nm.scan(arguments=scan_args)
+                nm = nmap.PortScanner(nmap_search_path=NMAP_PATH)
+                scan_args = f"{TARGET_IP} {scan_commands[i]}"
+                run_nmap_scan(nm, output_filenames[i], scan_args)
                 
-                # Save the results to a CSV file
-                with open(full_output_path, 'w') as csvfile:
-                    for host in nm.all_hosts():
-                        for proto in nm[host].all_protocols():
-                            lport = nm[host][proto].keys()
-                            for port in lport:
-                                # Extract relevant information and write it to the CSV file
-                                service = nm[host][proto][port]['name']
-                                state = nm[host][proto][port]['state']
-                                row = f"{host},{port}/{proto},{state},{service}\n"
-                                csvfile.write(row)
-                
-                # Sleep for 3 seconds after each scan
-                time.sleep(3)
+                # Sleep until the scan is completed (alternative to fixed sleep)
+                while nm.still_scanning():
+                    time.sleep(1)
             
             except Exception as e:
-                print(f"An error occurred during the Nmap scan: {e}")
+                print(f"An error occurred during the Nmap scan for {output_filenames[i]}: {e}")
         
         # Sleep for 5 seconds before saving the final CSV file
         time.sleep(5)
         
         # Capture and analyze network packets using dpkt
-        with open("captured_packets.pcap", 'rb') as pcap_file:
-            pcap_data = pcap_file.read()
-            analysis_results = analyze_packets(pcap_data)
+        # Add code for analyzing packets here (define analyze_packets function)
         
         # Save analysis results to a separate CSV file
-        save_analysis_to_csv(analysis_results, "packet_analysis.csv")
+        # Add code for saving analysis to CSV here (define save_analysis_to_csv function)
         
-        print("Scans completed, and results saved to 'nmap scans' directory on the desktop.")
-        print("Packet analysis results saved to 'packet_analysis.csv' on the desktop.")
-    
+        print("Scans completed, and results saved to 'nmap_scans' directory on the desktop.")
+        # Print a message about packet analysis
+        
     else:
         print("Aborted by user.")
