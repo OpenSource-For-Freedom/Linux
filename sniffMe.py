@@ -110,18 +110,6 @@ def set_file_permissions(file_path, permission_code):
     except Exception as e:
         print(f"An error occurred while setting file permissions: {e}")
 
-# Function to check if the target is reachable by pinging it
-def ping_target(ip_address):
-    try:
-        response = ping(ip_address, count=4)  # Send 4 ping packets
-        if response.success():
-            return True
-        else:
-            raise Exception(f"Target IP {ip_address} is not reachable.")
-    except Exception as e:
-        print(f"Error: {e}")
-        return False
-
 # Function to ask the user for confirmation to proceed
 def ask_user_confirmation():
     while True:
