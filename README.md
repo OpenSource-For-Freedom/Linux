@@ -1,7 +1,7 @@
 
 ***SNIFF_ME***
 ---
-The goal in developing this file is to quickly deploy an internal or external Netowrk Scanning package that outputs the results in a report format onto the users desktop or selected file path. 
+The goal in developing this pythonfile is to quickly deploy an internal or external Network Scanning package for both Linux and Windows OS, that outputs the results in a report format onto the users desktop or selected file path. 
 ---
 1. The File imports necessary modules such as os, nmap, csv, time, and pythonping.
 2. It will set some constants, including the target IP, Nmap file path, and the output directory for the scan results, which will be edited to allow more user interface.
