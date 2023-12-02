@@ -1,9 +1,16 @@
-
-***SNIFF_ME***
-
-((under_Construction))
+**This is the Linux (Unix) file space for endpoint, Server and Sandbox testing and Development**
+```
+mkdir "Please respect this space, for it is Linux"
+```
+Don't forget to:
+```
+sudo apt update && upgrade
+```
+**Project Readme's will exist below**
 ---
-The goal in developing this pythonfile is to quickly deploy an internal or external Network Scanning package for both Linux and Windows OS, that outputs the results in a report format onto the users desktop or selected file path. 
+***P1: Sniff_Me**
+---
+The goal in developing this python file is to quickly deploy an internal or external Network Scanning package for both Linux and Windows OS, that outputs the results in a report format onto the users desktop or selected file path. 
 ---
 1. The File imports necessary modules such as os, nmap, csv, time, and pythonping.
 2. It will set some constants, including the target IP, Nmap file path, and the output directory for the scan results, which will be edited to allow more user interface.
