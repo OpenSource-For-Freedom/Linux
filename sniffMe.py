@@ -13,6 +13,10 @@ OUTPUT_DIRECTORY = "/home/54321/Desktop/scans"
 # NMAP_PATH = "/usr/bin/nmap"
 OUTPUT_DIRECTORY = os.path.expanduser("~/Desktop/nmap_scans")
 
+# check for python version and file path
+# build function for file path confirmation and dependicy update 
+# function for dependancy uodate if os detects
+
 # Function to ping the target IP address
 def ping_target(ip_address):
     try:
