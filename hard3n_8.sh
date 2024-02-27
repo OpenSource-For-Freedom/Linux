@@ -45,7 +45,7 @@ if ! is_package_installed apparmor; then
     sudo apt-get install -y apparmor
 
 
-echo "Security tools installed successfully."
+echo "Security Tools Installed Successfully."
 
 # Automates the run sequence of ClamAV, rkhunter, and chkrootkit on a daily basis.
 
