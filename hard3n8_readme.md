@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This script automates the installation of essential security tools on a Debian-based system to enhance its security. Additionally, it includes a script for daily security scans to keep your system protected. Please share any issues/ updates or concerns. 
+This script automates the installation of essential security tools on a Debian-based system to enhance its security. If you think about it, a fresh Linux OS comes pretty bare bones, even Parrot and Kali. So After alot of poking around and trials, I said "Hey.. why don't I automate this thing" and chose bash, only becasue it sthe easier for me to operate in. Additionally, it includes a script for daily security scans to keep your system protected. Please share any issues/ updates or concerns, and always test your own environments. 
 
 ## Download Script
 ```
