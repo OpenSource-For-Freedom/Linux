@@ -6,7 +6,7 @@
 
 ## 🔍 In fact, you don't even have to use port 443 or port 80, to research this database of lucious info anymore... 
 
-### 🧙‍♂️ look no further...
+### 🧙‍♂️ look no further... Just download it and role. CI/CD needs you 👀
 
 ```bash
 git config --global user.name "[firstname lastname]"
