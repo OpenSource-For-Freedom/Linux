@@ -7,26 +7,42 @@ sudo apt-get update
 is_package_installed() {
     dpkg -l "$1" | grep -q "^ii"
 
-# Install ClamAV
-sudo apt-get install -y clamav
+# Update package lists
+sudo apt-get update
 
-# Install rkhunter
-sudo apt-get install -y rkhunter
+# Install ClamAV if not installed
+if ! is_package_installed clamav; then
+    sudo apt-get install -y clamav
+fi
 
-# Install chkrootkit
-sudo apt-get install -y chkrootkit
+# Install rkhunter if not installed
+if ! is_package_installed rkhunter; then
+    sudo apt-get install -y rkhunter
+fi
 
-# Install Fail2Ban
-sudo apt-get install -y fail2ban
+# Install chkrootkit if not installed
+if ! is_package_installed chkrootkit; then
+    sudo apt-get install -y chkrootkit
+fi
 
-# Install Lynis
-sudo apt-get install -y lynis
+# Install Fail2Ban if not installed
+if ! is_package_installed fail2ban; then
+    sudo apt-get install -y fail2ban
+fi
 
-# Install AIDE
-sudo apt-get install -y aide
+# Install Lynis if not installed
+if ! is_package_installed lynis; then
+    sudo apt-get install -y lynis
+fi
 
-# Install AppArmor
-sudo apt-get install -y apparmor
+# Install AIDE if not installed
+if ! is_package_installed aide; then
+    sudo apt-get install -y aide
+fi
+
+# Install AppArmor if not installed
+if ! is_package_installed apparmor; then
+    sudo apt-get install -y apparmor
 
 
 echo "Security tools installed successfully."
