@@ -10,8 +10,7 @@ from pythonping import ping
 TARGET_IP = "192.168.1.254"
 
 # Linux File Path 
-OUTPUT_DIRECTORY = "/home/54321/Desktop/scans"
-# Windows File path 
+OUTPUT_DIRECTORY = "/home/user/Desktop/scans"
 # OUTPUT_DIRECTORY = "FILE PATH TO Linux DIRECTORY"
 # Must change for desired file path
 NMAP_PATH = "/usr/bin/nmap"

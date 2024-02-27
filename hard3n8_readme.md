@@ -4,11 +4,15 @@
 
 This script automates the installation of essential security tools on a Debian-based system to enhance its security. Additionally, it includes a script for daily security scans to keep your system protected. Please share any issues/ updates or concerns. 
 
+## Download Script
+```
+hard3n_8.sh
+```
 ## Ensure you make script executable
 ```bash
 chmod +x hard3n_8.sh
 ```
-## Installation Script
+## Start Script
 ```bash
 $ sudo ./hard3n_8.sh
 ```
