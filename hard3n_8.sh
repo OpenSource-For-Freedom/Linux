@@ -3,6 +3,10 @@
 # Update package lists
 sudo apt-get update
 
+# Function to check if a package is installed
+is_package_installed() {
+    dpkg -l "$1" | grep -q "^ii"
+
 # Install ClamAV
 sudo apt-get install -y clamav
 
@@ -23,6 +27,7 @@ sudo apt-get install -y aide
 
 # Install AppArmor
 sudo apt-get install -y apparmor
+
 
 echo "Security tools installed successfully."
 
