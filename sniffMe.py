@@ -8,10 +8,18 @@ import schedule
 
 # Constants
 TARGET_IP = "192.168.1.254"
-# Linux File Path - using a linux only file path for now
+# detect OS
+# build function ti detect OS based on imported directories and needed dependancies
+# Linux File Path 
 OUTPUT_DIRECTORY = "/home/54321/Desktop/scans"
+# Windows File path 
+OUTPUT_DIRECTORY = "FILE PATH TO WINDOWS DIRECTORY"
 # NMAP_PATH = "/usr/bin/nmap"
 OUTPUT_DIRECTORY = os.path.expanduser("~/Desktop/nmap_scans")
+
+# check for python version and file path
+# build function for file path confirmation and dependicy update 
+# function for dependancy uodate if os detects
 
 # Function to ping the target IP address
 def ping_target(ip_address):
