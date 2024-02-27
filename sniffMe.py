@@ -1,20 +1,22 @@
+from asyncio import Protocol
 import os
 import nmap
 import csv
 import time
 import dpkt
 from pythonping import ping
-import schedule
 
 # Constants
 TARGET_IP = "192.168.1.254"
-# detect OS
-# build function ti detect OS based on imported directories and needed dependancies
+
 # Linux File Path 
 OUTPUT_DIRECTORY = "/home/54321/Desktop/scans"
 # Windows File path 
-OUTPUT_DIRECTORY = "FILE PATH TO WINDOWS DIRECTORY"
-# NMAP_PATH = "/usr/bin/nmap"
+# OUTPUT_DIRECTORY = "FILE PATH TO Linux DIRECTORY"
+# Must change for desired file path
+NMAP_PATH = "/usr/bin/nmap"
+
+# Use os.path.expanduser to get the user's home directory
 OUTPUT_DIRECTORY = os.path.expanduser("~/Desktop/nmap_scans")
 
 # check for python version and file path
@@ -47,8 +49,7 @@ def ask_user_confirmation():
         except ValueError:
             print("Invalid input. Please enter 1 to proceed or 2 to abort.")
 
-# Function to run Nmap and handle errors
-def run_nmap_scan(nm, output_filename, scan_args):
+#def run_nmap_scan(nm, output_filename, scan_args):
     try:
         nm.scan(arguments=scan_args)
         full_output_path = os.path.join(OUTPUT_DIRECTORY, output_filename)
