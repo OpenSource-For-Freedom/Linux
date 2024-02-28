@@ -66,6 +66,12 @@ DATE=$(date +"%Y%m%d_%H%M%S")
 # Setup and run ufw
 sudo ufw enable && sudo ufw default deny incoming && sudo systemctl --force --now enable ufw && sudo ufw reload && sudo ufw --force --now restart
 
+# Basic and fundamental hardening via TCP Wrappers
+# https://en.wikipedia.org/wiki/TCP_Wrappers
+echo "ALL: ALL" | sudo tee -a /etc/hosts.allow
+# Disallow non-local logins, this can be kept simple or we can go more in depth
+echo "-:ALL:ALL EXCEPT LOCAL" | sudo tee -a /etc/security/access.conf
+
 # Run ClamAV scan
 sudo clamscan -r / --log="$LOG_DIR/clamav_scan_$DATE.log"
 
