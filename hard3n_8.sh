@@ -10,6 +10,11 @@ is_package_installed() {
 # Update package lists
 sudo apt update
 
+# Install ufw if not installed
+if ! is_package_installed ufw; then
+    sudo apt install -yy ufw --no-install-recommends --no-install-suggests
+fi
+
 # Install ClamAV if not installed
 if ! is_package_installed clamav; then
     sudo apt install -yy clamav --no-install-recommends --no-install-suggests
@@ -57,6 +62,9 @@ sudo mkdir -p $LOG_DIR
 
 # Date and time for log file
 DATE=$(date +"%Y%m%d_%H%M%S")
+
+# Setup and run ufw
+sudo ufw enable && sudo ufw default deny incoming && sudo systemctl --force --now enable ufw && sudo ufw reload && sudo ufw --force --now restart
 
 # Run ClamAV scan
 sudo clamscan -r / --log="$LOG_DIR/clamav_scan_$DATE.log"
