@@ -1,15 +1,11 @@
-#!/bin/bash
+#!/bin/bash 
 # this package isntall all supported open source Linux hardening tools.
-# Update package lists
-sudo apt update
 
 # Function to check if a package is installed
 is_package_installed() {
     dpkg -l "$1" | grep -q "^ii"
 
-# Update package lists
-sudo apt update
-
+}
 # Install ufw if not installed
 if ! is_package_installed ufw; then
     sudo apt install -yy ufw --no-install-recommends --no-install-suggests
@@ -44,10 +40,14 @@ fi
 if ! is_package_installed aide; then
     sudo apt install -yy aide --no-install-recommends --no-install-suggests
 fi
-
 # Install AppArmor if not installed
 if ! is_package_installed apparmor; then
     sudo apt-get install -yy apparmor apparmor-profiles apparmor-profiles-extra apparmor-utils --no-install-recommends --no-install-suggests
+fi
+
+# update package list
+sudo apt update
+sudo apt-get update
 
 
 echo "Security Tools Installed Successfully."
