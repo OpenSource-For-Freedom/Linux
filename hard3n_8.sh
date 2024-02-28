@@ -68,7 +68,7 @@ sudo ufw enable && sudo ufw default deny incoming && sudo systemctl --force --no
 
 # Basic and fundamental hardening via TCP Wrappers
 # https://en.wikipedia.org/wiki/TCP_Wrappers
-echo "ALL: ALL" | sudo tee -a /etc/hosts.allow
+echo "ALL: ALL" | sudo tee -a /etc/hosts.deny
 # Disallow non-local logins, this can be kept simple or we can go more in depth
 echo "-:ALL:ALL EXCEPT LOCAL" | sudo tee -a /etc/security/access.conf
 
