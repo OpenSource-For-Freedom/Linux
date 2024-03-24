@@ -6,7 +6,7 @@ Prerequisites
 
 ## Before running this script, ensure you have installed:
 
-	•	Aircrack-ng: This suite is essential for the network testing functions used in the script.
+	•	Aircrack-ng: This tool is essential for the network testing functions used in the script.
 
 # Getting Started
 
@@ -16,7 +16,7 @@ To use this script, clone this repository or copy the script to your local machi
 
 # Usage
 
-## Run the script from the terminalbut make sure it has exe priviliages:
+## Run the script from terminal:
 
 > ./network_test.sh
 
@@ -38,11 +38,4 @@ To use this script, clone this repository or copy the script to your local machi
 	•	The script defaults to using wlan0 as the network interface. If your interface name is different, you will need to modify the script accordingly.
 
 ##Contributing
-
-Contributions to improve the script or add functionalities are welcome. Please fork the repository and submit a pull request with your changes.
-
-# License
-
-This project is licensed under the MIT License - see the LICENSE.md file for details.
-
-This README (to come) format provides a clear, concise overview of the script’s purpose, usage, and the steps it performs, adhering to common conventions in software documentation.
+please do
