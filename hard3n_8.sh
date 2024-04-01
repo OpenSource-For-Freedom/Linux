@@ -2,6 +2,9 @@
 ## Script that aims to harden an initial Debian based Linux build,
 ## fresh out the gates with some minimum security enforcements
 
+## Perhaps prior to all of this, we have a separate script run, add hardening measures,
+## then ask user to please go ahead and reboot after we run the update-grub command...
+
 # Function to check if a package is installed
 is_package_installed() {
     dpkg -l "$1" | grep -q "^ii"
@@ -12,7 +15,10 @@ is_package_installed() {
 echo 'APT::Sandbox::Seccomp "true";' | sudo tee /etc/apt/apt.conf.d/01seccomp
 echo -e 'APT::AutoRemove::RecommendsImportant "false";\nAPT::Install-Recommends "0";\nAPT::Install-Suggests "0";' | sudo tee /etc/apt/apt.conf.d/01defaultrec
 
-# update package list
+# Disable core dumps
+echo '* hard core 0;' | sudo tee -a /etc/security/limits.conf
+
+# Update package list
 sudo apt update
 
 # Install ufw if not installed
