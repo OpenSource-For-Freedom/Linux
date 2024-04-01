@@ -1,11 +1,20 @@
 #!/bin/bash 
-# this package isntall all supported open source Linux hardening tools.
+## Script that aims to harden an initial Debian based Linux build,
+## fresh out the gates with some minimum security enforcements
 
 # Function to check if a package is installed
 is_package_installed() {
     dpkg -l "$1" | grep -q "^ii"
-
 }
+
+# Part of hardening your system is maintaining a minimized attack surface via reducing unnecessary installed applications
+# APT::Sandbox::Seccomp further reading: https://lists.debian.org/debian-doc/2019/02/msg00009.html
+echo 'APT::Sandbox::Seccomp "true";' | sudo tee /etc/apt/apt.conf.d/01seccomp
+echo -e 'APT::AutoRemove::RecommendsImportant "false";\nAPT::Install-Recommends "0";\nAPT::Install-Suggests "0";' | sudo tee /etc/apt/apt.conf.d/01defaultrec
+
+# update package list
+sudo apt update
+
 # Install ufw if not installed
 if ! is_package_installed ufw; then
     sudo apt install -yy ufw --no-install-recommends --no-install-suggests
@@ -44,11 +53,6 @@ fi
 if ! is_package_installed apparmor; then
     sudo apt-get install -yy apparmor apparmor-profiles apparmor-profiles-extra apparmor-utils --no-install-recommends --no-install-suggests
 fi
-
-# update package list
-sudo apt update
-sudo apt-get update
-
 
 echo "Security Tools Installed Successfully."
 
