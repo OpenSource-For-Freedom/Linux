@@ -10,6 +10,23 @@ is_package_installed() {
     dpkg -l "$1" | grep -q "^ii"
 }
 
+## Kernel level mitigations, critical
+## Note to self to do a few additional things here...
+## Check if apparmor.cfg isn't already present, if it is, just add to it,
+## Add a check to make sure the update-grub went correctly, few ways to do this
+## Hmmm.... lots to work on!
+sudo cp -Rv ./etc/default/grub.d/* /etc/default/grub.d
+grub-mkconfig -o /boot/grub/grub.cfg
+sudo 
+if [ -x /usr/sbin/update-grub ]; then
+    sudo /usr/sbin/update-grub
+else
+    sudo grub-mkconfig -o /boot/grub/grub.cfg
+fi
+echo 'Your system will restart in 10 seconds if you do not cancel this program'
+sleep 10
+sudo reboot
+
 # Part of hardening your system is maintaining a minimized attack surface via reducing unnecessary installed applications
 # APT::Sandbox::Seccomp further reading: https://lists.debian.org/debian-doc/2019/02/msg00009.html
 echo 'APT::Sandbox::Seccomp "true";' | sudo tee /etc/apt/apt.conf.d/01seccomp
