@@ -13,3 +13,4 @@ order bind,hosts
 multi on
 -More to come....
 -Change project name to Hard3n_Linux ?
+-Big one: Start  doing a basic apparmor config after too, but don't break the system, maintain useability
