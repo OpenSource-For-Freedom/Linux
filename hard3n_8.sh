@@ -14,49 +14,60 @@ set -euo pipefail
 ## Add a check to make sure the update-grub went correctly, few ways to do this
 ## Hmmm.... lots to work on!
 
-########## This function is currently not working properly, I will re-do this later
-## Note to self, make this a separate script??? Hmm, potentially good idea?!?
-#sudo cp -Rv ./etc/default/grub.d/* /etc/default/grub.d
-#grub-mkconfig -o /boot/grub/grub.cfg
-#sudo 
-#if [ -x /usr/sbin/update-grub ]; then
-#    sudo /usr/sbin/update-grub
-#else
-#    sudo grub-mkconfig -o /boot/grub/grub.cfg
-#fi
-#echo 'Your system will restart in 10 seconds if you do not cancel this program'
-#sleep 10
-#sudo reboot
+## Copying configurations from the local grub.d to system grub.d,
+## This will NOT overwrite your pre-existing values
+exec_e "sudo cp -Rv ./etc/default/grub.d/* /etc/default/grub.d"
 
-# Function to check if a package is installed
+## Update grub if update-grub exists, else
+## regenerate grub configuration (update-grub the older way)
+if command -v update-grub &>/dev/null; then
+    exec_e "sudo update-grub"
+else
+    exec_e "sudo grub-mkconfig -o /boot/grub/grub.cfg"
+fi
+
+## Notify user about system restart
+echo 'Your system will restart in 10 seconds if you do not cancel this program'
+## I should probably explain to them how to use ctrl-c...hmm..
+sleep 10
+
+## Reboot the system
+exec_e "sudo reboot"
+
+## Function to check if a package is installed
 is_package_installed() {
     dpkg -l "$1" | grep -q "^ii"
 }
 
-# Log file directory
+## Log file directory
+## Should we do it in /var/log/security_scans or potentially
+## allow the user to input where to log (define a path variable)
+## or allow them the prompt chance to disable logging? Hmm...
 LOG_DIR="/var/log/security_scans"
 
-# Ensure the log directory exists
+## Ensure the log directory exists
 sudo mkdir -p "$LOG_DIR"
 
-# Date and time for log file
+## Date and time for log file
+## Alternatively we can do %m/%d/%Y_%S%M%S, both are valid
 DATE=$(date +"%Y%m%d_%H%M%S")
 
-# Log file for script execution
+## Log file for script execution
 SCRIPT_LOG="$LOG_DIR/script_execution_$DATE.log"
 echo "Starting hard3n_8.sh execution at $(date)" | sudo tee -a "$SCRIPT_LOG"
 
-# Function for logging
+## Function for logging
 log() {
     echo "$(date +"%Y-%m-%d %T") $1" | sudo tee -a "$SCRIPT_LOG"
 }
-# Verify if script is executed with root privileges
+
+## Verify if script is executed with root privileges
 if [ "$(id -u)" -ne 0 ]; then
-    log "Error: Please run this script with sudo or as root."
+    log "Error: Please re-run this script with sudo or as root."
     exit 1
 fi
 
-# Function to check if a command executed successfully
+## Function to check if a command executed successfully
 check_success() {
     if [ $? -ne 0 ]; then
         log "Error: $1 failed. Exiting hard3n_8.sh."
@@ -66,22 +77,22 @@ check_success() {
     fi
 }
 
-# Exec extended, logging and checking command was successful
+## Exec extended, logging and checking command was successful
 exec_e() {
     "$@"
     check_success "$1"
 }
 ## End note on this section, should I use hard3n_8.sh or name it after whatever the user names it as?
 
-# Part of hardening your system is maintaining a minimized attack surface via reducing unnecessary installed applications
-# APT::Sandbox::Seccomp further reading: https://lists.debian.org/debian-doc/2019/02/msg00009.html
+## Part of hardening your system is maintaining a minimized attack surface via reducing unnecessary installed applications
+## APT::Sandbox::Seccomp further reading: https://lists.debian.org/debian-doc/2019/02/msg00009.html
 echo 'APT::Sandbox::Seccomp "true";' | sudo tee /etc/apt/apt.conf.d/01seccomp
 echo -e 'APT::AutoRemove::RecommendsImportant "false";\nAPT::Install-Recommends "0";\nAPT::Install-Suggests "0";' | sudo tee /etc/apt/apt.conf.d/01defaultrec
 
-# Update package list
+## Update package list
 exec_e apt update
 
-# Install ufw then enable and configure it, if not installed
+## Install ufw then enable and configure it, if not installed
 if ! is_package_installed ufw; then
     exec_e apt install -yy ufw --no-install-recommends --no-install-suggests
     exec_e ufw enable
@@ -91,7 +102,7 @@ if ! is_package_installed ufw; then
     exec_e ufw --force --now restart
 fi
 
-# Install and configure ClamAV, rkhunter, chkrootkit, Fail2Ban, Lynis, AIDE, and AppArmor (plus AA-extras and utils)
+## Install and configure ClamAV, rkhunter, chkrootkit, Fail2Ban, Lynis, AIDE, and AppArmor (plus AA-extras and utils)
 PACKAGES=("clamav" "rkhunter" "chkrootkit" "fail2ban" "lynis" "aide" "apparmor apparmor-profiles apparmor-profiles-extra apparmor-utils")
 for package in "${PACKAGES[@]}"; do
     if ! is_package_installed "$package"; then
@@ -101,27 +112,27 @@ done
 
 echo "Security Tools Installed Successfully."
 
-# Enable strict mode, RE-enable in case anything unset
+## Enable strict mode, RE-enable in case anything unset
 set -euo pipefail
 
 ############# !! Move to separate section, organize by parts
 ## of script..... note to self as script gets bigger...this
 ## alongside other additions/changes to pam, the limits.conf
 ## and other files in /etc/security will go in this section ##
-# Disable core dumps
+## Disable core dumps
 echo '* hard core 0;' | sudo tee -a /etc/security/limits.conf
 
-# Basic and fundamental hardening via TCP Wrappers
-# https://en.wikipedia.org/wiki/TCP_Wrappers
+## Basic and fundamental hardening via TCP Wrappers
+## https://en.wikipedia.org/wiki/TCP_Wrappers
 echo "ALL: ALL" | sudo tee -a /etc/hosts.deny
-# Disallow non-local logins, this can be kept simple or we can go more in depth
+## Disallow non-local logins, this can be kept simple or we can go more in depth
 echo "-:ALL:ALL EXCEPT LOCAL" | sudo tee -a /etc/security/access.conf
 ## What about hosts.deny? What shall I do there?
 
-# Run security scans
+## Run security scans
 exec_e clamscan -r / --log="$LOG_DIR/clamav_scan_$DATE.log"
 exec_e rkhunter --cronjob --update --quiet
 exec_e chkrootkit | sudo tee "$LOG_DIR/chkrootkit_scan_$DATE.log"
 
-# Notification
+## Notification
 log "Daily security scans completed. Logs stored in $LOG_DIR"
