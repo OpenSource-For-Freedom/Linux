@@ -2,110 +2,126 @@
 ## Script that aims to harden an initial Debian based Linux build,
 ## fresh out the gates with some minimum security enforcements
 
-## Perhaps prior to all of this, we have a separate script run, add hardening measures,
-## then ask user to please go ahead and reboot after we run the update-grub command...
-
-# Function to check if a package is installed
-is_package_installed() {
-    dpkg -l "$1" | grep -q "^ii"
-}
+## e, errexit | u, nounset (treats unset variables as errors, ensuring better uniformity)
+## -o pipefail, ensures that if a command in a pipeline fails, the overall exit status of
+## the pipeline is the status of the last command to fail, rather
+## than just the status of the last command
+set -euo pipefail
 
 ## Kernel level mitigations, critical
 ## Note to self to do a few additional things here...
 ## Check if apparmor.cfg isn't already present, if it is, just add to it,
 ## Add a check to make sure the update-grub went correctly, few ways to do this
 ## Hmmm.... lots to work on!
-sudo cp -Rv ./etc/default/grub.d/* /etc/default/grub.d
-grub-mkconfig -o /boot/grub/grub.cfg
-sudo 
-if [ -x /usr/sbin/update-grub ]; then
-    sudo /usr/sbin/update-grub
-else
-    sudo grub-mkconfig -o /boot/grub/grub.cfg
+
+########## This function is currently not working properly, I will re-do this later
+## Note to self, make this a separate script??? Hmm, potentially good idea?!?
+#sudo cp -Rv ./etc/default/grub.d/* /etc/default/grub.d
+#grub-mkconfig -o /boot/grub/grub.cfg
+#sudo 
+#if [ -x /usr/sbin/update-grub ]; then
+#    sudo /usr/sbin/update-grub
+#else
+#    sudo grub-mkconfig -o /boot/grub/grub.cfg
+#fi
+#echo 'Your system will restart in 10 seconds if you do not cancel this program'
+#sleep 10
+#sudo reboot
+
+# Function to check if a package is installed
+is_package_installed() {
+    dpkg -l "$1" | grep -q "^ii"
+}
+
+# Log file directory
+LOG_DIR="/var/log/security_scans"
+
+# Ensure the log directory exists
+sudo mkdir -p "$LOG_DIR"
+
+# Date and time for log file
+DATE=$(date +"%Y%m%d_%H%M%S")
+
+# Log file for script execution
+SCRIPT_LOG="$LOG_DIR/script_execution_$DATE.log"
+echo "Starting hard3n_8.sh execution at $(date)" | sudo tee -a "$SCRIPT_LOG"
+
+# Function for logging
+log() {
+    echo "$(date +"%Y-%m-%d %T") $1" | sudo tee -a "$SCRIPT_LOG"
+}
+# Verify if script is executed with root privileges
+if [ "$(id -u)" -ne 0 ]; then
+    log "Error: Please run this script with sudo or as root."
+    exit 1
 fi
-echo 'Your system will restart in 10 seconds if you do not cancel this program'
-sleep 10
-sudo reboot
+
+# Function to check if a command executed successfully
+check_success() {
+    if [ $? -ne 0 ]; then
+        log "Error: $1 failed. Exiting hard3n_8.sh."
+        exit 1
+    else
+        log "$1 completed successfully."
+    fi
+}
+
+# Exec extended, logging and checking command was successful
+exec_e() {
+    "$@"
+    check_success "$1"
+}
+## End note on this section, should I use hard3n_8.sh or name it after whatever the user names it as?
 
 # Part of hardening your system is maintaining a minimized attack surface via reducing unnecessary installed applications
 # APT::Sandbox::Seccomp further reading: https://lists.debian.org/debian-doc/2019/02/msg00009.html
 echo 'APT::Sandbox::Seccomp "true";' | sudo tee /etc/apt/apt.conf.d/01seccomp
 echo -e 'APT::AutoRemove::RecommendsImportant "false";\nAPT::Install-Recommends "0";\nAPT::Install-Suggests "0";' | sudo tee /etc/apt/apt.conf.d/01defaultrec
 
-# Disable core dumps
-echo '* hard core 0;' | sudo tee -a /etc/security/limits.conf
-
 # Update package list
-sudo apt update
+exec_e apt update
 
-# Install ufw if not installed
+# Install ufw then enable and configure it, if not installed
 if ! is_package_installed ufw; then
-    sudo apt install -yy ufw --no-install-recommends --no-install-suggests
+    exec_e apt install -yy ufw --no-install-recommends --no-install-suggests
+    exec_e ufw enable
+    exec_e ufw default deny incoming
+    exec_e systemctl --force --now enable ufw
+    exec_e ufw reload
+    exec_e ufw --force --now restart
 fi
 
-# Install ClamAV if not installed
-if ! is_package_installed clamav; then
-    sudo apt install -yy clamav --no-install-recommends --no-install-suggests
-fi
-
-# Install rkhunter if not installed
-if ! is_package_installed rkhunter; then
-    sudo apt install -yy rkhunter --no-install-recommends --no-install-suggests
-fi
-
-# Install chkrootkit if not installed
-if ! is_package_installed chkrootkit; then
-    sudo apt install -yy chkrootkit --no-install-recommends --no-install-suggests
-fi
-
-# Install Fail2Ban if not installed
-if ! is_package_installed fail2ban; then
-    sudo apt install -yy fail2ban --no-install-recommends --no-install-suggests
-fi
-
-# Install Lynis if not installed
-if ! is_package_installed lynis; then
-    sudo apt install -yy lynis --no-install-recommends --no-install-suggests
-fi
-
-# Install AIDE if not installed
-if ! is_package_installed aide; then
-    sudo apt install -yy aide --no-install-recommends --no-install-suggests
-fi
-# Install AppArmor if not installed
-if ! is_package_installed apparmor; then
-    sudo apt-get install -yy apparmor apparmor-profiles apparmor-profiles-extra apparmor-utils --no-install-recommends --no-install-suggests
-fi
+# Install and configure ClamAV, rkhunter, chkrootkit, Fail2Ban, Lynis, AIDE, and AppArmor (plus AA-extras and utils)
+PACKAGES=("clamav" "rkhunter" "chkrootkit" "fail2ban" "lynis" "aide" "apparmor apparmor-profiles apparmor-profiles-extra apparmor-utils")
+for package in "${PACKAGES[@]}"; do
+    if ! is_package_installed "$package"; then
+        execute_command apt install -yy $package --no-install-recommends --no-install-suggests
+    fi
+done
 
 echo "Security Tools Installed Successfully."
 
-# Automates the run sequence of ClamAV, rkhunter, and chkrootkit on a daily basis.
+# Enable strict mode, RE-enable in case anything unset
+set -euo pipefail
 
-# Location to store scan logs
-LOG_DIR="/var/log/security_scans"
-
-# Ensure the log directory exists
-sudo mkdir -p $LOG_DIR
-
-# Date and time for log file
-DATE=$(date +"%Y%m%d_%H%M%S")
-
-# Setup and run ufw
-sudo ufw enable && sudo ufw default deny incoming && sudo systemctl --force --now enable ufw && sudo ufw reload && sudo ufw --force --now restart
+############# !! Move to separate section, organize by parts
+## of script..... note to self as script gets bigger...this
+## alongside other additions/changes to pam, the limits.conf
+## and other files in /etc/security will go in this section ##
+# Disable core dumps
+echo '* hard core 0;' | sudo tee -a /etc/security/limits.conf
 
 # Basic and fundamental hardening via TCP Wrappers
 # https://en.wikipedia.org/wiki/TCP_Wrappers
 echo "ALL: ALL" | sudo tee -a /etc/hosts.deny
 # Disallow non-local logins, this can be kept simple or we can go more in depth
 echo "-:ALL:ALL EXCEPT LOCAL" | sudo tee -a /etc/security/access.conf
+## What about hosts.deny? What shall I do there?
 
-# Run ClamAV scan
-sudo clamscan -r / --log="$LOG_DIR/clamav_scan_$DATE.log"
+# Run security scans
+exec_e clamscan -r / --log="$LOG_DIR/clamav_scan_$DATE.log"
+exec_e rkhunter --cronjob --update --quiet
+exec_e chkrootkit | sudo tee "$LOG_DIR/chkrootkit_scan_$DATE.log"
 
-# Run rkhunter
-sudo rkhunter --cronjob --update --quiet
-
-# Run chkrootkit
-sudo chkrootkit | sudo tee "$LOG_DIR/chkrootkit_scan_$DATE.log"
-
-echo "Daily security scans completed. Logs stored in $LOG_DIR"
+# Notification
+log "Daily security scans completed. Logs stored in $LOG_DIR"
