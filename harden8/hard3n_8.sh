@@ -94,6 +94,7 @@ exec_e apt update
 
 ## Install ufw then enable and configure it, if not installed
 if ! is_package_installed ufw; then
+    exec_e apt update
     exec_e apt install -yy ufw --no-install-recommends --no-install-suggests
     exec_e ufw enable
     exec_e ufw default deny incoming
@@ -115,8 +116,19 @@ echo "Security Tools Installed Successfully."
 ## Enable strict mode, RE-enable in case anything unset
 set -euo pipefail
 
-## Custom script inclusion for additional hardening
+## downstream script for more hardening like you mentioned(TCP wrappers, the boogie_man and of course lock_ness?!?! just throwing more ideas for some light weight
+#utilities for this project)
 source harden8_deep.sh
+check_harden8_deep_success() {
+    if [ $? -eq 0 ]; then
+        echo "harden8_deep dependency ran successfully."
+    else
+        echo "Error: harden8_deep.sh did not run successfully."
+        exit 1
+    fi
+}
+#check for success
+check_harden8_deep_success
 
 ## Run security scans
 exec_e clamscan -r / --log="$LOG_DIR/clamav_scan_$DATE.log"
