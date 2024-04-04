@@ -8,16 +8,34 @@
 ## than just the status of the last command
 set -euo pipefail
 
+## Verify if script is executed with root privileges
+if [ "$(id -u)" -ne 0 ]; then
+    log "Error: Please re-run this script with sudo or as root."
+    exit 1
+fi
+## Function to check if a command executed successfully
+check_success() {
+    if [ $? -ne 0 ]; then
+        log "Error: $1 failed. Exiting hard3n_8.sh."
+        exit 1
+    else
+        log "$1 completed successfully."
+    fi
+}
+## Exec extended, logging and checking command was successful
+exec_e() {
+    "$@"
+    check_success "$1"
+}
+
 ## Kernel level mitigations, critical
 ## Note to self to do a few additional things here...
 ## Check if apparmor.cfg isn't already present, if it is, just add to it,
 ## Add a check to make sure the update-grub went correctly, few ways to do this
 ## Hmmm.... lots to work on!
-
 ## Copying configurations from the local grub.d to system grub.d,
 ## This will NOT overwrite your pre-existing values
 exec_e "sudo cp -Rv ./etc/default/grub.d/* /etc/default/grub.d"
-
 ## Update grub if update-grub exists, else
 ## regenerate grub configuration (update-grub the older way)
 if command -v update-grub &>/dev/null; then
@@ -25,14 +43,14 @@ if command -v update-grub &>/dev/null; then
 else
     exec_e "sudo grub-mkconfig -o /boot/grub/grub.cfg"
 fi
-
 ## Notify user about system restart
 echo 'Your system will restart in 10 seconds if you do not cancel this program'
 ## I should probably explain to them how to use ctrl-c...hmm..
 sleep 10
-
 ## Reboot the system
 exec_e "sudo reboot"
+## End of Kernel hardening
+
 
 ## Function to check if a package is installed
 is_package_installed() {
@@ -61,27 +79,6 @@ log() {
     echo "$(date +"%Y-%m-%d %T") $1" | sudo tee -a "$SCRIPT_LOG"
 }
 
-## Verify if script is executed with root privileges
-if [ "$(id -u)" -ne 0 ]; then
-    log "Error: Please re-run this script with sudo or as root."
-    exit 1
-fi
-
-## Function to check if a command executed successfully
-check_success() {
-    if [ $? -ne 0 ]; then
-        log "Error: $1 failed. Exiting hard3n_8.sh."
-        exit 1
-    else
-        log "$1 completed successfully."
-    fi
-}
-
-## Exec extended, logging and checking command was successful
-exec_e() {
-    "$@"
-    check_success "$1"
-}
 ## Part of hardening your system is maintaining a minimized attack surface via reducing unnecessary installed applications
 ## APT::Sandbox::Seccomp further reading: https://lists.debian.org/debian-doc/2019/02/msg00009.html
 echo 'APT::Sandbox::Seccomp "true";' | sudo tee /etc/apt/apt.conf.d/01seccomp
