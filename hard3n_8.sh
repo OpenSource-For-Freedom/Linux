@@ -115,7 +115,7 @@ echo "Security Tools Installed Successfully."
 ## Enable strict mode, RE-enable in case anything unset
 set -euo pipefail
 
-## Custom script inclusion for additional hardening
+## custom script ot point to dependant security file
 source harden8_deep.sh
 
 ## Run security scans
