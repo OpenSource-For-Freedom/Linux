@@ -82,8 +82,6 @@ exec_e() {
     "$@"
     check_success "$1"
 }
-## End note on this section, should I use hard3n_8.sh or name it after whatever the user names it as?
-
 ## Part of hardening your system is maintaining a minimized attack surface via reducing unnecessary installed applications
 ## APT::Sandbox::Seccomp further reading: https://lists.debian.org/debian-doc/2019/02/msg00009.html
 echo 'APT::Sandbox::Seccomp "true";' | sudo tee /etc/apt/apt.conf.d/01seccomp
