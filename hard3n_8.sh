@@ -97,6 +97,7 @@ if ! is_package_installed ufw; then
     exec_e apt install -yy ufw --no-install-recommends --no-install-suggests
     exec_e ufw enable
     exec_e ufw default deny incoming
+    exec_e ufw default allow outgoing # only way my deb would allow outbound... @kiukiucat
     exec_e systemctl --force --now enable ufw
     exec_e ufw reload
     exec_e ufw --force --now restart
@@ -109,7 +110,13 @@ for package in "${PACKAGES[@]}"; do
         execute_command apt install -yy $package --no-install-recommends --no-install-suggests
     fi
 done
-
+# error handling
+if [ $? -ne 0 ]; then
+    log "Error: One or more packages failed to install. Exiting hard3n_8.sh."
+    exit 1ne 0 ]; 
+else
+    log "All packages installed successfully."
+fi 
 echo "Security Tools Installed Successfully."
 
 ## Enable strict mode, RE-enable in case anything unset
@@ -117,11 +124,21 @@ set -euo pipefail
 
 ## custom script ot point to dependant security file
 source harden8_deep.sh
+# need to push this to dependant file ^ @kiukiucat
 
 ## Run security scans
 exec_e clamscan -r / --log="$LOG_DIR/clamav_scan_$DATE.log"
 exec_e rkhunter --cronjob --update --quiet
 exec_e chkrootkit | sudo tee "$LOG_DIR/chkrootkit_scan_$DATE.log"
 
+# I would think we need to show a status... tikinter python gui may be good,.... take a look at that .py file needed, I can build a dependant file that shoot sup a small gui showing "Scan time vs Amount scanned" 
+# then again... I just love flexing a gui as a huge terminal scrolls... nothing sexier than a scrolling terminal bro... nothing.@kiukiucat
+
 ## Notification
 log "Daily security scans completed. Logs stored in $LOG_DIR"
+
+# init crontab here? to set time sync on scanning?
+crontab_init_time_sync_on_scan_complete
+
+## Reboot the system
+exec_e "sudo reboot"
