@@ -7,7 +7,7 @@ This guide provides detailed steps to maintain your Debian-based system, ensurin
 
 ## 1. Check and Set the Correct Repository Mirror
 
-- **Open the Sources List**: Access your `sources.list` file with a text editor using the command below:
+**Open the Sources List**: Access your `sources.list` file with a text editor using the command below:
 
   ```bash
   sudo nano /etc/apt/sources.list
