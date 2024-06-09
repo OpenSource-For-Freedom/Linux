@@ -41,6 +41,8 @@ read -p "Enter the channel of the network: " CHANNEL
 # automate this with grep/awk based on the SSID input.
 # dont forget to identify ssid
 
+# Tinkinter GUI interface for Tablet or phone
+# will push to Android project
 
 # need sleep function 
 
