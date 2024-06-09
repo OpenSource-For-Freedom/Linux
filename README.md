@@ -1,4 +1,4 @@
-# Hard3n_8 Linux Project
+The Linux Project
 
 Private Task List: Pre-Release Activities
 
