@@ -1,6 +1,6 @@
-# The Linux Project
+# <div align="center"> The Linux Project
 
-Private Task List: Pre-Release Activities
+## <div align="center">Private Task List: Pre-Release Activities
 
 Welcome to the Hard3n_Linux repository! Below is a carefully curated list of tasks to address prior to releasing our project. These activities are crucial for enhancing the security and functionality of our system. While the list is not in any specific order, each item is pivotal for our release strategy.
 
@@ -23,3 +23,47 @@ Welcome to the Hard3n_Linux repository! Below is a carefully curated list of tas
 find / -mount -perm -2000 -type f -exec ls -ld {} \; > /home/user/setgid_.txt && chown -v user:user /home/user/setgid_.txt
 
 	•	Ongoing Configurations: Continue to fortify the system by modifying security settings in /etc/security, `/etc/host.conf​⬤
+
+
+
+- Ongoing Configurations: Continue to fortify the system by modifying security settings in `/etc/security`, `/etc/host.conf`.
+
+<br clear="both">
+
+<div align="center">
+</div>
+
+###
+
+<br clear="both">
+
+
+
+###
+
+## <div align="center">Summary:</h3>
+
+###
+
+<div align="center">We are Linux Engineers, present in building what we call the Autopilot of Linux Security.</h4>
+
+###
+
+## <div align="center">Programming Languages:</h3>
+
+###
+
+<div align="center">
+GNU BASH + PYTHON
+</div>
+
+
+###
+<div align="center">
+
+
+</div>
+
+###
+
+
