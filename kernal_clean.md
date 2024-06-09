@@ -118,9 +118,7 @@ It's good practice to reboot your system after significant updates, especially k
   ```
   sudo reboot
   ```
-
 ---
 
 Please Follow these steps regularly to keep your Debian-based system in good health and performance, dont be lazy. 
 ```
-
